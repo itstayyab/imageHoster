@@ -169,11 +169,7 @@ public class ImageController {
     //This controller method is called when the request pattern is of type 'deleteImage' and also the incoming request is of DELETE type
     //The method calls the deleteImage() method in the business logic passing the id of the image to be deleted
     //Looks for a controller method with request mapping of type '/images'
-//    @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
-//    public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId) {
-//        imageService.deleteImage(imageId);
-//        return "redirect:/images";
-//    }
+
     @RequestMapping(value = "/deleteImage", method = RequestMethod.DELETE)
     public String deleteImageSubmit(@RequestParam(name = "imageId") Integer imageId, Model model, HttpSession session) {
 
