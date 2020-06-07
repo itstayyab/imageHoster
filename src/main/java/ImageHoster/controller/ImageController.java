@@ -5,6 +5,11 @@ import ImageHoster.model.Tag;
 import ImageHoster.model.User;
 import ImageHoster.service.ImageService;
 import ImageHoster.service.TagService;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.List;
+import java.util.StringTokenizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,10 +51,12 @@ public class ImageController {
     //Here a list of tags is added in the Model type object
     //this list is then sent to 'images/image.html' file and the tags are displayed
     @RequestMapping("/images/{imageId}/{title}")
-    public String showImage(@PathVariable("imageId") Integer imageId, @PathVariable("title") String title, Model model) {
-        Image image = imageService.getImageById(imageId);
+    public String showImage(@PathVariable("imageId") Integer imageId, @PathVariable("title") String title, Model model) throws NullPointerException {
+        Image image = imageService.getImage(imageId);
+        List<Tag> tags = image.getTags();
         model.addAttribute("image", image);
-        model.addAttribute("tags", image.getTags());
+        model.addAttribute("tags", tags);
+        model.addAttribute("comments", image.getComments());
         return "images/image";
     }
 
@@ -71,15 +78,23 @@ public class ImageController {
     //Store all the tags in the database and make a list of all the tags using the findOrCreateTags() method
     //set the tags attribute of the image as a list of all the tags returned by the findOrCreateTags() method
     @RequestMapping(value = "/images/upload", method = RequestMethod.POST)
-    public String createImage(@RequestParam("file") MultipartFile file, @RequestParam("tags") String tags, Image newImage, HttpSession session) throws IOException {
+    public String createImage(@RequestParam("file") MultipartFile file, @RequestParam("tags") String tags, Image passedImage, HttpSession session) throws IOException {
+        Image newImage = new Image();
+        newImage.setTitle(passedImage.getTitle());
+        newImage.setDescription(passedImage.getDescription());
 
         User user = (User) session.getAttribute("loggeduser");
         newImage.setUser(user);
         String uploadedImageData = convertUploadedFileToBase64(file);
         newImage.setImageFile(uploadedImageData);
 
-        List<Tag> imageTags = findOrCreateTags(tags);
-        newImage.setTags(imageTags);
+        if (!tags.isEmpty()) {
+            List<Tag> imageTags = findOrCreateTags(tags);
+            newImage.setTags(imageTags);
+        } else {
+            List<Tag> imageTags = findOrCreateTags("Image");
+            newImage.setTags(imageTags);
+        }
         newImage.setDate(new Date());
         imageService.uploadImage(newImage);
         return "redirect:/images";
@@ -103,11 +118,13 @@ public class ImageController {
             List<Tag> tagsList = image.getTags();
             String tags = convertTagsToString(image.getTags());
             model.addAttribute("tags", tags);
+            model.addAttribute("comments", image.getComments());
             return "images/edit";
         } else {
             List<Tag> tags = image.getTags();
             model.addAttribute("image", image);
             model.addAttribute("tags", tags);
+            model.addAttribute("comments", image.getComments());
             String error = "Only the owner of the image can edit the image";
             model.addAttribute("editError", error);
             return "images/image";
@@ -145,7 +162,7 @@ public class ImageController {
         updatedImage.setDate(new Date());
 
         imageService.updateImage(updatedImage);
-        return "redirect:/images/" + updatedImage.getTitle();
+        return "redirect:/images/" + updatedImage.getId() + "/" + updatedImage.getTitle();
     }
 
 
