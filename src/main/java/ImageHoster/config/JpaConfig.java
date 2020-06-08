@@ -11,22 +11,21 @@ import javax.sql.DataSource;
 @Configuration
 public class JpaConfig {
 
-    @Bean
-    public EntityManagerFactory entityManagerFactory() {
-        LocalContainerEntityManagerFactoryBean emfb = new LocalContainerEntityManagerFactoryBean();
-        emfb.setPersistenceXmlLocation("classpath:META-INF/persistence.xml");
-        emfb.afterPropertiesSet();
-        return emfb.getObject();
-    }
+  @Bean
+  public EntityManagerFactory entityManagerFactory() {
+    LocalContainerEntityManagerFactoryBean emfb = new LocalContainerEntityManagerFactoryBean();
+    emfb.setPersistenceXmlLocation("classpath:META-INF/persistence.xml");
+    emfb.afterPropertiesSet();
+    return emfb.getObject();
+  }
 
-    @Bean
-    public DataSource dataSource() {
-        DriverManagerDataSource ds = new DriverManagerDataSource();
-        ds.setDriverClassName("org.postgresql.Driver");
-        ds.setUrl("jdbc:postgresql://localhost:5432/imageHoster");
-        ds.setUsername("postgres");
-        ds.setPassword("secretpassword");
-        return ds;
-    }
+  @Bean
+  public DataSource dataSource() {
+    DriverManagerDataSource ds = new DriverManagerDataSource();
+    ds.setDriverClassName("org.postgresql.Driver");
+    ds.setUrl("jdbc:postgresql://localhost:5432/imageHoster");
+    ds.setUsername("postgres");
+    ds.setPassword("secretpassword");
+    return ds;
+  }
 }
-
